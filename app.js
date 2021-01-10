@@ -4,8 +4,13 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+const expressAccessToken = require('express-access-token');
+const apiVersion = process.env.API_VERSION;
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var ordersRouter = require('./routes/orders');
+
 
 var app = express();
 
@@ -19,8 +24,18 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+const accessTokens = [process.env.ACCESS_TOKEN];
+
+const firewall = (req, res, next) => {
+  const authorized = accessTokens.includes(req.accessToken);
+  if(!authorized) return res.status(403).json({'message':'Unauthorized'});
+  next();
+};
+
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/api/v1/users', expressAccessToken, firewall, usersRouter);
+app.use('/api/v1/orders', expressAccessToken, firewall, ordersRouter);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
