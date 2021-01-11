@@ -50,7 +50,8 @@ router.post('/', async function(req, res, next) {
     '${JSON.stringify(midtrans)}', 
     '${timestamp()}', 
     '${timestamp()}',
-    0
+    0,
+    '${req.body.tgl_lahir}'
   )`;
   
   try {
