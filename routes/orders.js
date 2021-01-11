@@ -65,9 +65,10 @@ router.post('/', async function(req, res, next) {
     //   data: checkOrder,
     //   response: order
     // });
-    return res.json({
-      doNumber: checkOrder.recordset[0].order_id
-    });
+    res.status(200);
+
+    return res.json(checkOrder.recordset[0].order_id);
+
   } catch (e) {
     res.status(400);
     return res.json(e);  
