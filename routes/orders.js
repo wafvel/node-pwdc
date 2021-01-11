@@ -11,28 +11,21 @@ require("../configs/databaseConnection").then(pool => {
 /* POST new order */
 router.post('/', async function(req, res, next) {
   
-  try {
-    let checkOrder = await db.query(`SELECT * from TDaftarOnline where wc_order_id = ${req.body.wc_order_id}`);
+  let exist = await checkExisting(req.body.wc_order_id);
 
-    if(checkOrder.rowsAffected[0] > 0){
-      res.status(409);
-      return res.json({
-        message:'resource exist',
-        // response:checkOrder
-      });
-    } 
-    
+  if(exist === 1 ){
+    res.status(409);
+    return res.json({
+      message: 'resource exist'
+    });  
+  } else {
     console.log('new order received!')
-    
-  } catch (e) {
-    res.status(400);
-    return res.json(e);  
   }
 
-  let orderId = `DO-${yearMonth()}-${pad(req.body.wc_order_id,5)}`;
-
+  let number = await getFormatedOrderId();
+  let orderId = `DO-${yearMonth()}-${pad(number,4)}`;
+  
   let midtrans = await getMidtransData(req.body.wc_order_id);
-
   let paymentMethod = await getPaymentMethod(midtrans);
 
   // return res.json(midtrans);
@@ -56,14 +49,17 @@ router.post('/', async function(req, res, next) {
     '${paymentMethod.number}', 
     '${JSON.stringify(midtrans)}', 
     '${timestamp()}', 
-    '${timestamp()}'
+    '${timestamp()}',
+    0
   )`;
   
   try {
     let order = await db.query(query);
     let checkOrder = await db.query(`SELECT * from TDaftarOnline where wc_order_id = ${req.body.wc_order_id}`);
     
-    console.log(order)
+    console.log(order);
+    incrementNumber(parseInt(number)+1);
+
     return res.json({
       message: 'success',
       data: checkOrder,
@@ -75,6 +71,21 @@ router.post('/', async function(req, res, next) {
   }
 
 });
+
+async function checkExisting(id) {
+  try {
+    let checkOrder = await db.query(`SELECT * from TDaftarOnline where wc_order_id = ${id}`);
+
+    if(checkOrder.rowsAffected[0] > 0){
+      return 1;
+    } else {
+      return 0;
+    }     
+  } catch (e) {
+    console.log(e);
+    return 0;  
+  }
+}
 
 async function getPaymentMethod (midtrans) {
   
@@ -143,6 +154,51 @@ function pad(num, size) {
   return s.substr(s.length-size);
 }
 
+async function getFormatedOrderId() {
+
+  const now = new Date();
+  const offsetMs = now.getTimezoneOffset() * 60 * 1000;
+  const dateLocal = new Date(now.getTime() - offsetMs);
+  
+  let month = dateLocal.getMonth()+1;
+
+  try {
+    let data = await db.query(`SELECT * from TDaftarOnline_increments where month = '${month}'`);
+
+    let number = data.recordset[0].number;
+
+    //check year change
+      let year = new Date(data.recordset[0].updated_at);
+      let currentYear = await getCurrentFullDigitYear();
+      if(year.getFullYear() !== currentYear) {
+        number = 1;
+      }
+    // end check year
+    
+    return number;
+
+  } catch (e) {
+    console.log (e);  
+    return null;
+  }
+}
+
+async function incrementNumber(number) {
+
+  const now = new Date();
+  const offsetMs = now.getTimezoneOffset() * 60 * 1000;
+  const dateLocal = new Date(now.getTime() - offsetMs);
+  
+  let month = dateLocal.getMonth()+1;
+
+  try {
+    let data = await db.query(`UPDATE TDaftarOnline_increments SET number = ${number} , updated_at = '${timestamp()}' where month = '${month}'`);
+    console.log(data)
+  } catch (e) {
+    console.log (e);  
+  }
+}
+
 function yearMonth() {
 
   const now = new Date();
@@ -156,6 +212,16 @@ function yearMonth() {
   let month = dateLocal.getMonth()+1;
 
   return `${year}${pad(month,2)}`;
+}
+
+async function getCurrentFullDigitYear(date) {
+  const now = new Date();
+  const offsetMs = now.getTimezoneOffset() * 60 * 1000;
+  const dateLocal = new Date(now.getTime() - offsetMs);
+  
+  var getYear =  dateLocal.getFullYear(); // get current year
+
+  return getYear;
 }
 
 function timestamp() {
