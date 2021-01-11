@@ -60,10 +60,13 @@ router.post('/', async function(req, res, next) {
     console.log(order);
     incrementNumber(parseInt(number)+1);
 
+    // return res.json({
+    //   message: 'success',
+    //   data: checkOrder,
+    //   response: order
+    // });
     return res.json({
-      message: 'success',
-      data: checkOrder,
-      response: order
+      doNumber: checkOrder.recordset[0].order_id
     });
   } catch (e) {
     res.status(400);
