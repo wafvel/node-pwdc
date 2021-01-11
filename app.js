@@ -5,7 +5,6 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 const expressAccessToken = require('express-access-token');
-const apiVersion = process.env.API_VERSION;
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
