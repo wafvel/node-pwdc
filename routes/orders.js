@@ -1,4 +1,3 @@
-const { json } = require('express');
 var express = require('express');
 var router = express.Router();
 const got = require('got');
@@ -53,6 +52,37 @@ router.post('/', async function(req, res, next) {
     0,
     '${req.body.tgl_lahir}'
   )`;
+
+  // if(typeof(req.body.items) !== 'undefined' && req.body.items.length > 0) {
+    try {
+      req.body.items.forEach(async item => {
+
+        let disc = item.discount || 0;
+        let total = disc !== 0 ? (parseFloat(item.price) - (disc*parseFloat(item.price)/100)) : parseFloat(item.price);
+
+        let itemQuery = `INSERT INTO TDaftarOnline_details VALUES (
+          ${req.body.wc_order_id}, 
+          '${orderId}', 
+          '${item.product_id}',
+          '${item.name}',
+          ${item.qty},
+          ${item.price},
+          ${disc},
+          ${total},
+          '${item.remarks || null}',
+          '${timestamp()}', 
+          '${timestamp()}'        
+        )`;
+        let itemSave = await db.query(itemQuery);
+        console.log('Added new item :');    
+        console.log(itemSave);
+      });
+      
+    } catch (error) {
+      console.log('Add new item error');    
+      console.log(error);    
+    }
+  // }
   
   try {
     let order = await db.query(query);
