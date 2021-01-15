@@ -50,7 +50,8 @@ router.post('/', async function(req, res, next) {
     '${timestamp()}', 
     '${timestamp()}',
     0,
-    '${req.body.tgl_lahir}'
+    '${req.body.tgl_lahir}',
+    '${req.body.jenis_kelamin}'
   )`;
 
   // if(typeof(req.body.items) !== 'undefined' && req.body.items.length > 0) {
@@ -71,7 +72,8 @@ router.post('/', async function(req, res, next) {
           ${total},
           '${item.remarks || null}',
           '${timestamp()}', 
-          '${timestamp()}'        
+          '${timestamp()}',
+          '${item.sku}'        
         )`;
         let itemSave = await db.query(itemQuery);
         console.log('Added new item :');    
