@@ -9,14 +9,20 @@ require("../configs/databaseConnection").then(pool => {
 
 /* POST new order */
 router.post('/', async function(req, res, next) {
-  
-  let exist = await checkExisting(req.body.wc_order_id);
 
-  if(exist === 1 ){
+  console.debug(req);
+  
+  // let exist = await checkExisting(req.body.wc_order_id);
+  let checkOrder = await db.query(`SELECT * from TDaftarOnline where wc_order_id = ${req.body.wc_order_id}`);
+  console.debug(checkOrder);
+
+  if(typeof checkOrder.recordset[0].order_id !== 'undefined' ){
     res.status(409);
-    return res.json({
-      message: 'resource exist'
-    });  
+    // let checkOrder = await db.query(`SELECT * from TDaftarOnline where wc_order_id = ${req.body.wc_order_id}`);
+    return res.json(checkOrder.recordset[0].order_id);
+    // return res.json({
+    //   message: 'resource exist'
+    // });  
   } else {
     console.log('new order received!')
   }
@@ -87,7 +93,7 @@ router.post('/', async function(req, res, next) {
   // }
   
   try {
-    let order = await db.query(query);
+    // let order = await db.query(query);
     let checkOrder = await db.query(`SELECT * from TDaftarOnline where wc_order_id = ${req.body.wc_order_id}`);
     
     console.log(order);
