@@ -16,7 +16,7 @@ router.post('/', async function(req, res, next) {
   let checkOrder = await db.query(`SELECT * from TDaftarOnline where wc_order_id = ${req.body.wc_order_id}`);
   console.debug(checkOrder.recordset);
 
-  if(checkOrder.recordset !== []){
+  if(typeof checkOrder.recordset[0] !== 'undefined'){
     res.status(409);
     console.debug(checkOrder.recordset[0]);
     // let checkOrder = await db.query(`SELECT * from TDaftarOnline where wc_order_id = ${req.body.wc_order_id}`);
@@ -25,6 +25,8 @@ router.post('/', async function(req, res, next) {
     //   message: 'resource exist'
     // });  
   } else {
+    console.debug(req.body);
+
     console.log('new order received!')
   }
 
