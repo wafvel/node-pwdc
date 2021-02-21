@@ -18,6 +18,7 @@ router.post('/', async function(req, res, next) {
 
   if(checkOrder.recordset[0] !== []){
     res.status(409);
+    console.debug(checkOrder);
     // let checkOrder = await db.query(`SELECT * from TDaftarOnline where wc_order_id = ${req.body.wc_order_id}`);
     return res.json(checkOrder.recordset[0].order_id);
     // return res.json({
