@@ -96,7 +96,7 @@ router.post('/', async function(req, res, next) {
   // }
   
   try {
-    // let order = await db.query(query);
+    let order = await db.query(query);
     let checkOrder = await db.query(`SELECT * from TDaftarOnline where wc_order_id = ${req.body.wc_order_id}`);
     
     console.log(order);
