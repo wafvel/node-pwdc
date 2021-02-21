@@ -108,7 +108,7 @@ router.post('/', async function(req, res, next) {
     //   response: order
     // });
     res.status(200);
-
+    console.log(checkOrder.recordset[0].order_id);
     return res.json(checkOrder.recordset[0].order_id);
 
   } catch (e) {
